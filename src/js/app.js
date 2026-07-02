@@ -64,4 +64,12 @@ if ("serviceWorker" in navigator) {
 
         });  */
 
+        import { exportPdf } from "./exportPdf.js";
+
+exportPdf(despesas, {
+  funcionario: "João",
+  mes: "Julho/2026",
+  emitidoEm: "01/07/2026"
+});
+
 });
