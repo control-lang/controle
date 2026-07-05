@@ -1,69 +1,45 @@
-/**
- * ==========================================
- * app.js
- * Inicialização da aplicação
- * ==========================================
- */
+document.addEventListener("DOMContentLoaded", async () => {
 
-document.addEventListener("DOMContentLoaded", () => {
+    await atualizarTabela();
 
-    // Carrega tabela
-    atualizarTabela();
-
-    // =====================
-    // Excel
-    // =====================
-
-    document
-        .getElementById("btnExcel")
+    document.getElementById("btnExcel")
         .addEventListener("click", exportarExcel);
 
-    // =====================
-    // PDF
-    // =====================
-
-    document
-        .getElementById("btnPdf")
+    document.getElementById("btnPdf")
         .addEventListener("click", exportarPDF);
 
-    // =====================
-    // Limpar Tudo
-    // =====================
+    document.getElementById("btnLimpar").addEventListener("click", async () => {
+        const confirmar = confirm("Tem certeza que deseja apagar todas as despesas?");
+        if (!confirmar) return;
 
-    document.getElementById("btnLimpar").addEventListener("click", () => {
+        try {
+            await limparStorage();
+            await atualizarTabela();
+            mostrarMensagem("Todas as despesas foram removidas com sucesso!");
+        } catch (err) {
+            mostrarMensagem(err.message);
+        }
+    });
 
-    const confirmar = confirm("Tem certeza que deseja apagar todas as despesas?");
+    const userData = await fetch("/api/auth/me", { credentials: "same-origin" });
+    if (userData.ok) {
+        const me = await userData.json();
+        const nomeEl = document.createElement("div");
+        nomeEl.style.cssText = "text-align:right;padding:4px 12px;font-size:13px;color:#666;";
+        nomeEl.innerHTML = `Olá, ${me.nome} | <a href="#" id="btnLogout" style="color:#d32f2f;">Sair</a>`;
+        document.querySelector(".header").after(nomeEl);
 
-    if (!confirmar) return;
-
-    localStorage.removeItem("despesas");
-
-    atualizarTabela();
-
-    mostrarMensagem("Todas as despesas foram removidas com sucesso!");
-
+        document.getElementById("btnLogout").addEventListener("click", async (e) => {
+            e.preventDefault();
+            await fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "same-origin"
+            });
+            window.location.href = "/login";
+        });
+    }
 });
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js");
 }
-
-   /* document
-        .getElementById("btnLimpar")
-        .addEventListener("click", () => {
-
-            if (!confirm("Deseja apagar todas as despesas?")) {
-                return;
-            }
-
-            localStorage.removeItem("despesas");
-
-            atualizarTabela();
-
-            mostrarMensagem("Todas as despesas foram removidas.");
-
-        });  */
-
-   
-
-});

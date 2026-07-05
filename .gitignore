@@ -38,6 +38,12 @@ Thumbs.db
 *~
 *.bak
 
+/* Python */
+__pycache__/
+*.pyc
+backend/database.db
+*.egg-info/
+
 /* Optional: logs do app */
 logs/
 *.log

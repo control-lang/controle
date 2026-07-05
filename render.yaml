@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: gerador-planilha
+    runtime: python
+    region: ohio
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gerador-planilha-db
+          property: connectionString
+      - key: RENDER
+        value: "true"
+
+databases:
+  - name: gerador-planilha-db
+    region: ohio
+    plan: free
+    databaseName: despesas
+    ipAllowList: []

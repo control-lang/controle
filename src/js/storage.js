@@ -1,146 +1,69 @@
-/**
- * ==========================================
- * storage.js
- * Controle do LocalStorage
- * ==========================================
- */
+const API = "/api";
 
-const STORAGE_KEY = "relatorio_despesas";
-
-/**
- * Retorna todas as despesas.
- */
-function buscarDespesas() {
-
-    const dados = localStorage.getItem(STORAGE_KEY);
-
-    if (!dados) {
-
-        return [];
-
-    }
-
-    return JSON.parse(dados);
-
-}
-
-/**
- * Salva a lista completa.
- */
-function salvarDespesas(lista) {
-
-    localStorage.setItem(
-
-        STORAGE_KEY,
-
-        JSON.stringify(lista)
-
-    );
-
-}
-
-/**
- * Adiciona uma despesa.
- */
-function adicionarDespesaStorage(despesa) {
-
-    const despesas = buscarDespesas();
-
-    despesas.push(despesa);
-
-    salvarDespesas(despesas);
-
-}
-
-/**
- * Atualiza uma despesa existente.
- */
-function atualizarDespesaStorage(id, novosDados) {
-
-    const despesas = buscarDespesas();
-
-    const novaLista = despesas.map(item => {
-
-        if (item.id === id) {
-
-            return {
-
-                ...item,
-
-                ...novosDados
-
-            };
-
-        }
-
-        return item;
-
+async function apiFetch(path, options = {}) {
+    const res = await fetch(`${API}${path}`, {
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        ...options,
     });
-
-    salvarDespesas(novaLista);
-
+    if (res.status === 401) {
+        window.location.href = "/login";
+        throw new Error("Não autenticado");
+    }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.erro || "Erro na requisição");
+    return data;
 }
 
-/**
- * Remove uma despesa.
- */
-function removerDespesaStorage(id) {
-
-    const despesas = buscarDespesas();
-
-    const novaLista = despesas.filter(item => item.id !== id);
-
-    salvarDespesas(novaLista);
-
+async function buscarDespesas() {
+    const data = await apiFetch("/despesas");
+    return data;
 }
 
-/**
- * Limpa todas as despesas.
- */
-function limparStorage() {
-
-    localStorage.removeItem(STORAGE_KEY);
-
+async function salvarDespesas() {
 }
 
-/**
- * Calcula o valor total.
- */
-function calcularTotal() {
-
-    const despesas = buscarDespesas();
-
-    return despesas.reduce((total, item) => {
-
-        return total + Number(item.valor);
-
-    }, 0);
-
+async function adicionarDespesaStorage(despesa) {
+    await apiFetch("/despesas", {
+        method: "POST",
+        body: JSON.stringify(despesa),
+    });
 }
 
-/**
- * Verifica se existe alguma despesa.
- */
-function possuiDespesas() {
-
-    return buscarDespesas().length > 0;
-
+async function atualizarDespesaStorage(id, novosDados) {
+    await apiFetch(`/despesas/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(novosDados),
+    });
 }
 
-/**
- * Busca uma despesa pelo ID.
- */
-function buscarDespesaPorId(id) {
-
-    return buscarDespesas().find(item => item.id === id);
-
+async function removerDespesaStorage(id) {
+    await apiFetch(`/despesas/${id}`, { method: "DELETE" });
 }
 
-/**
- * Retorna a quantidade de despesas.
- */
-function quantidadeDespesas() {
+async function limparStorage() {
+    const despesas = await buscarDespesas();
+    for (const d of despesas) {
+        await removerDespesaStorage(d.id);
+    }
+}
 
-    return buscarDespesas().length;
+async function calcularTotal() {
+    const data = await apiFetch("/despesas/total");
+    return data.total;
+}
 
+async function possuiDespesas() {
+    const despesas = await buscarDespesas();
+    return despesas.length > 0;
+}
+
+async function buscarDespesaPorId(id) {
+    const despesas = await buscarDespesas();
+    return despesas.find(item => item.id === id) || null;
+}
+
+async function quantidadeDespesas() {
+    const despesas = await buscarDespesas();
+    return despesas.length;
 }
