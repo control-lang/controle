@@ -33,6 +33,8 @@ Thumbs.db
 /* Temporary files */
 *.tmp
 *.temp
+cook*.txt
+testcookies.txt
 
 /* Backup files */
 *~

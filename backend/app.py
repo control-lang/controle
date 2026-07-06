@@ -116,9 +116,7 @@ def api_login():
 def api_logout():
     logout_user()
     session.clear()
-    if request.method == "GET":
-        return redirect(url_for("login_page"))
-    return jsonify({"ok": True})
+    return send_from_directory(app.static_folder, "login.html")
 
 
 @app.route("/api/auth/me")
