@@ -10,6 +10,11 @@ async function apiFetch(path, options = {}) {
         window.location.href = "/login";
         throw new Error("Não autenticado");
     }
+    const ct = res.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) {
+        window.location.href = "/login";
+        throw new Error("Redirecionado");
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.erro || "Erro na requisição");
     return data;

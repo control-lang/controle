@@ -25,6 +25,13 @@ db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login_page"
 
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    if request.path.startswith("/api/"):
+        return jsonify({"erro": "Não autenticado"}), 401
+    return redirect(url_for("login_page"))
+
 with app.app_context():
     import sqlalchemy
     inspector = sqlalchemy.inspect(db.engine)
@@ -35,6 +42,14 @@ with app.app_context():
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
+
+
+# ────────── FAVICON ──────────
+
+@app.route("/favicon.ico")
+@app.route("/favicon.svg")
+def favicon():
+    return send_from_directory(os.path.join(app.static_folder, "public"), "favicon.ico")
 
 
 # ────────── SERVE FRONTEND ──────────
