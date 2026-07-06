@@ -111,11 +111,13 @@ def api_login():
     return jsonify({"ok": True, "nome": user.nome})
 
 
-@app.route("/api/auth/logout", methods=["POST"])
+@app.route("/api/auth/logout", methods=["GET", "POST"])
 @login_required
 def api_logout():
     logout_user()
     session.clear()
+    if request.method == "GET":
+        return redirect(url_for("login_page"))
     return jsonify({"ok": True})
 
 

@@ -21,22 +21,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    const userData = await fetch("/api/auth/me", { credentials: "same-origin" });
-    if (userData.ok) {
-        const me = await userData.json();
-        const nomeEl = document.createElement("div");
-        nomeEl.style.cssText = "text-align:right;padding:4px 12px;font-size:13px;color:#666;";
-        nomeEl.innerHTML = `Olá, ${me.nome} | <a href="#" id="btnLogout" style="color:#d32f2f;">Sair</a>`;
-        document.querySelector(".header").after(nomeEl);
-
-        document.getElementById("btnLogout").addEventListener("click", async (e) => {
-            e.preventDefault();
-            await fetch("/api/auth/logout", {
-                method: "POST",
-                credentials: "same-origin"
-            });
-            window.location.href = "/login";
-        });
+    try {
+        const userData = await fetch("/api/auth/me");
+        if (userData.ok) {
+            const me = await userData.json();
+            const nomeEl = document.createElement("div");
+            nomeEl.style.cssText = "text-align:right;padding:4px 12px;font-size:13px;color:#666;";
+            nomeEl.innerHTML = `Olá, ${me.nome} | <a href="/api/auth/logout" style="color:#d32f2f;">Sair</a>`;
+            document.querySelector(".header").after(nomeEl);
+        }
+    } catch (e) {
+        // não autenticado
     }
 });
 
